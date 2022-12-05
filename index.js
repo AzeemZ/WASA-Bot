@@ -1,32 +1,16 @@
-import express from "express";
-import bp from "body-parser";
 import twilio from "twilio";
 import * as dotenv from "dotenv";
 dotenv.config();
 
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
-
-const app = express();
-const client = new twilio(accountSid, authToken);
+const client = twilio(accountSid, authToken);
 
 client.messages
   .create({
-    body: "Hello from Node",
-    to: "+923414640493", // Text this number
-    from: "+13854584239", // From a valid Twilio number
+    body: "Your Yummy Cupcakes Company order of 1 dozen frosted cupcakes has shipped and should be delivered on July 10, 2019. Details: http://www.yummycupcakes.com/",
+    from: "whatsapp:+14155238886",
+    to: "whatsapp:+923414640493",
   })
   .then((message) => console.log(message.sid))
-  .catch((error) => console.log(error));
-
-process.exit(0);
-
-app.use(bp.json());
-
-app.get("/", (req, res) => {
-  res.send("Yo Wasssup!");
-});
-
-app.listen(3000, () => {
-  console.log("Server listening on port 3000!");
-});
+  .done();
