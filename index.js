@@ -1,6 +1,12 @@
+import express from "express";
+import bp from "body-parser";
 import twilio from "twilio";
 import * as dotenv from "dotenv";
 dotenv.config();
+
+const app = express();
+
+app.use(bp.json());
 
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
@@ -14,3 +20,11 @@ client.messages
   })
   .then((message) => console.log(message.sid))
   .done();
+
+app.get("/", (req, res) => {
+  res.send("Hey There!");
+});
+
+app.listen(3000, () => {
+  console.log("Server listening on port 3000!");
+});
