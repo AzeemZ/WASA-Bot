@@ -28,11 +28,19 @@ app.get("/", (req, res) => {
 });
 
 app.post("/sms", (req, res) => {
+  // client.conversations.v1.conversations
+  //   .create({ friendlyName: "Friendly Conversation" })
+  //   .then((conversation) => console.log(conversation.sid));
+
+  client.conversations.v1
+    .conversations("CH278301a8734a4411bbc1dc5b10628038")
+    .fetch()
+    .then((conversation) => console.log(conversation.friendlyName));
+
   const twiml = new MessagingResponse();
 
   // Access the message body and the number it was sent from.
   // console.log(`Incoming message from ${req.body.From}: ${req.body.Body}`);
-  console.log(JSON.stringify(req.body));
   const mediaURL = "https://demo.twilio.com/owl.png";
 
   twiml.message(
