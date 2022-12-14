@@ -1,12 +1,19 @@
 import express from "express";
 import bp from "body-parser";
 import twilio from "twilio";
+import session from "express-session";
 import * as dotenv from "dotenv";
 dotenv.config();
 
 const app = express();
 
 app.use(bp.urlencoded({ extended: false }));
+app.use(
+  session({
+    secret: "anything-you-want-but-keep-secret",
+    saveUninitialized: false,
+  })
+);
 
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
@@ -27,43 +34,65 @@ app.get("/", (req, res) => {
   res.send("Sample Endpoint!");
 });
 
-app.post("/sms", (req, res) => {
-  // client.conversations.v1.conversations
-  //   .create({ friendlyName: "Friendly Conversation" })
-  //   .then((conversation) => console.log(conversation.sid));
+// client.conversations.v1.conversations
+//   .create({ uniqueName: "test convo" })
+//   .then((conversation) => console.log(conversation.sid))
+//   .catch((err) => console.log(err));
 
-  client.conversations.v1
-    .conversations("CH278301a8734a4411bbc1dc5b10628038")
-    .fetch()
-    .then((conversation) => console.log(conversation.friendlyName));
+// client.conversations.v1
+//   .conversations("CHd292994751bb4a9a9a5579f1717e2b55")
+//   .fetch()
+//   .then((conversation) => console.log(conversation));
+
+// client.conversations.v1
+//   .conversations("CH6f79d6760a60477dacbb1088f97373c3")
+//   .fetch()
+//   .then((conversation) => console.log(conversation.friendlyName));
+
+app.post("/sms", (req, res) => {
+  const smsCount = req.session.counter || 0;
+
+  let message = "Hello, thanks for the new message.";
+
+  if (smsCount > 0) {
+    message = "Hello, thanks for message number " + (smsCount + 1);
+  }
+
+  req.session.counter = smsCount + 1;
 
   const twiml = new MessagingResponse();
+  twiml.message(message);
 
-  // Access the message body and the number it was sent from.
-  // console.log(`Incoming message from ${req.body.From}: ${req.body.Body}`);
-  const mediaURL = "https://demo.twilio.com/owl.png";
+  res.writeHead(200, { "Content-Type": "text/xml" });
+  res.end(twiml.toString());
 
-  twiml.message(
-    `Hi👋 *${req.body.ProfileName}*,
+  //   const twiml = new MessagingResponse();
 
-Welcome to WASA WhatsApp Self Service
-For the desired service, reply with the option number.
+  //   // Access the message body and the number it was sent from.
+  //   // console.log(`Incoming message from ${req.body.From}: ${req.body.Body}`);
+  //   const mediaURL = "https://demo.twilio.com/owl.png";
 
-  1️⃣ Duplicate Bill
-  2️⃣ Go Green! Subscribe for E-Bill
-  3️⃣ Technical Complaints
-  4️⃣ Billing Complaints
-  5️⃣ Tubewell Schedule of Your Area
-  6️⃣ New Connections
-  7️⃣ Bill Payment
-  8️⃣ Language Selection
-  9️⃣ Find Us
-  `
-  );
-  // .media(mediaURL);
+  //   twiml.message(
+  //     `Hi👋 *${req.body.ProfileName}*,
 
-  res.set("Content-Type", "text/xml");
-  res.status(200).send(twiml.toString());
+  // Welcome to WASA WhatsApp Self Service
+  // For the desired service, reply with the option number.
+
+  //   1️⃣ Duplicate Bill
+  //   2️⃣ Go Green! Subscribe for E-Bill
+  //   3️⃣ Technical Complaints
+  //   4️⃣ Billing Complaints
+  //   5️⃣ Tubewell Schedule of Your Area
+  //   6️⃣ New Connections
+  //   7️⃣ Bill Payment
+  //   8️⃣ Language Selection
+  //   9️⃣ Find Us
+  //   `
+  //   );
+  //   // .media(mediaURL);
+
+  //   res.set("Content-Type", "text/xml");
+  //   res.status(200).send(twiml.toString());
 });
 
 app.listen(3000, () => {
